@@ -1,0 +1,32 @@
+# Restrafe ships NO files from STRAFTAT: the game reads the player's own installation in place.
+
+# Local development material that must never be committed: old exports (test reference data), decompiled code,
+# and tools
+/ripped/
+/ripped_gltf/
+/decompiled/
+/tools/AssetRipper/
+/tools/.assetmap
+/tools/.guidmap
+/tools/*.log
+
+# Only the port's own shaders live under game/assets
+/game/assets/*
+!/game/assets/shaders/
+
+# Build output and per-user config (launch.cmd copies the built game to Restrafe.exe)
+/Restrafe.exe
+/target/
+/game/target/
+/game/config/
+
+# Local development material (notes, logs, captures, scratch tools)
+/dev/
+/progress_shots/
+/images/
+/PROGRESS.md
+/CLAUDE.md
+/docs/GAME_TODO.md
+/docs/RELEASE_TODO.md
+/docs/PORTING_GUIDE.md
+/docs/player_prefab_raw.txt

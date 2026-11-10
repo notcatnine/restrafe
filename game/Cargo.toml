@@ -1,0 +1,43 @@
+[package]
+name = "restrafe"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+default-run = "restrafe"
+
+[dependencies]
+half = "2"
+# Debug GPU timestamps (gpu_timer.rs); same wgpu as Bevy, no extra features.
+wgpu = { version = "29.0", default-features = false }
+bevy = { version = "0.19", features = ["serialize", "wav", "pbr_light_textures"] }
+bevy_rapier3d = "0.36"
+rand = "0.10.3"
+lz4_flex = { version = "0.11", default-features = false, features = ["std"] }
+texture2ddecoder = "0.1"
+lewton = "0.10"
+crc32fast = "1.5"
+ron = "0.12.2"
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.151"
+serde_yaml = "0.9"
+
+# Fast iteration: optimize dependencies even in dev builds (physics/math are slow unoptimized).
+[profile.dev]
+opt-level = 1
+
+[profile.dev.package."*"]
+opt-level = 3
+
+[features]
+profile = ["bevy/trace_chrome"]
+
+# Vendored bevy_pbr 0.19.1 (MIT/Apache-2.0) with LIGHTMAPS_PER_SLAB 32: correct lightmaps in deferred (see PROGRESS).
+[patch.crates-io]
+bevy_pbr = { path = "vendor/bevy_pbr" }
+
+# Error message boxes (release builds have no console window).
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = ["Win32_UI_WindowsAndMessaging", "Win32_Foundation"] }
+
+[build-dependencies]
+cc = "1"

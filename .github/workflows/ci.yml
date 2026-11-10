@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  windows:
+    name: Build and test (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: game
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: game
+      - name: Build
+        run: cargo build --release --bins --locked
+      # Without a STRAFTAT installation the reference tests skip themselves; the format and logic tests run.
+      - name: Test
+        run: cargo test --release --locked

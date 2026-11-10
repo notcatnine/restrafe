@@ -1,0 +1,6 @@
+# Keep LF in every checkout (shader-source patches in unity_light.rs match exact text; CRLF also breaks
+# include_str! comparisons). Binary files are left alone.
+* text=auto eol=lf
+*.png binary
+*.ktx2 binary
+*.cmd text eol=crlf
