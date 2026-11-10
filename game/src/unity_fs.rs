@@ -24,7 +24,8 @@ impl<'a> Cursor<'a> {
         Cursor { b, p: 0, be }
     }
     fn take(&mut self, n: usize) -> Result<&'a [u8]> {
-        let s = self.b.get(self.p..self.p + n).ok_or_else(|| format!("unexpected end of data at {}", self.p))?;
+        let end = self.p.checked_add(n).ok_or_else(|| format!("bad length {n} at {}", self.p))?;
+        let s = self.b.get(self.p..end).ok_or_else(|| format!("unexpected end of data at {}", self.p))?;
         self.p += n;
         Ok(s)
     }
@@ -245,8 +246,8 @@ impl SerializedFile {
         let head = bundle.read_node(node, 0, 48)?;
         let mut c = Cursor::new(&head, true);
         let (_meta_size, _fs, version, _data_offset) = (c.u32()?, c.u32()?, c.u32()?, c.u32()?);
-        if version < 22 {
-            return Err(format!("{}: serialized file version {version} not supported (needs 22+)", node.path));
+        if !(22..=30).contains(&version) {
+            return Err(format!("{}: not a serialized file (or version {version}, needs 22+)", node.path));
         }
         let big_endian = c.u8()? != 0;
         c.take(3)?;
@@ -255,12 +256,21 @@ impl SerializedFile {
         let data_offset = c.i64()? as u64;
         c.i64()?;
         let header_len = c.p as u64;
+        // other bundle files (.resS / .resource data) fail these checks instead of being read as garbage
+        if meta_size == 0 || header_len + meta_size > node.size || data_offset > node.size {
+            return Err(format!("{}: not a serialized file", node.path));
+        }
         let meta = bundle.read_node(node, header_len, meta_size)?;
+        // a count can never need more bytes than the metadata holds
+        let fits = |n: i32, each: usize| n >= 0 && (n as usize).saturating_mul(each) <= meta.len();
         let mut c = Cursor::new(&meta, big_endian);
         let unity_version = c.cstr()?;
         let _platform = c.i32()?;
         let type_trees = c.u8()? != 0;
         let nt = c.i32()?;
+        if !fits(nt, 23) {
+            return Err(format!("{}: not a serialized file", node.path));
+        }
         let mut types = Vec::new();
         for _ in 0..nt {
             let class_id = c.i32()?;
@@ -272,14 +282,17 @@ impl SerializedFile {
                 // TypeTree blob: node count, string buffer size, 32-byte nodes, strings; then dependencies.
                 let nodes = c.i32()? as usize;
                 let strings = c.i32()? as usize;
-                c.take(nodes * 32 + strings)?;
+                c.take(nodes.saturating_mul(32).saturating_add(strings))?;
                 let deps = c.i32()? as usize;
-                c.take(deps * 4)?;
+                c.take(deps.saturating_mul(4))?;
             }
             types.push(SerializedType { class_id, script_id, has_type_tree: type_trees });
         }
         let no = c.i32()?;
-        let mut objects = Vec::with_capacity(no.max(0) as usize);
+        if !fits(no, 24) {
+            return Err(format!("{}: not a serialized file", node.path));
+        }
+        let mut objects = Vec::with_capacity(no as usize);
         for _ in 0..no {
             c.align(4);
             let path_id = c.i64()?;
