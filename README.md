@@ -1,6 +1,7 @@
 # Restrafe
 
 [![CI](https://github.com/notcatnine/restrafe/actions/workflows/ci.yml/badge.svg)](https://github.com/notcatnine/restrafe/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/notcatnine/restrafe?include_prereleases)](https://github.com/notcatnine/restrafe/releases)
 
 An experimental, single-player Rust/[Bevy](https://bevyengine.org) 0.19 reconstruction of STRAFTAT's movement,
 weapons, HUD, health, player model, cosmetics, audio and settings, played in one test map with a training dummy.
@@ -11,14 +12,33 @@ Multiplayer, the other maps, music and the main menu are out of scope.
 **This repository contains no STRAFTAT files.** You must own STRAFTAT on Steam. Restrafe is not affiliated with or
 endorsed by the developers or publisher of STRAFTAT.
 
-## Setup steps
+## Download and play
 
-1. **Install STRAFTAT through Steam.** Restrafe needs the files of your owned Steam PC copy. The repository does
-   not include or download them.
-2. **Install the build tools.** This repository contains source, not a ready-to-play executable. On Windows,
-   install [Rust](https://rustup.rs/) with the MSVC toolchain, [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/)
+1. **Install STRAFTAT through Steam.** Restrafe reads the files of your owned Steam PC copy; it does not include or
+   download them.
+2. **Download** `Restrafe-…-windows-x64.zip` from the [latest release](https://github.com/notcatnine/restrafe/releases)
+   and extract it somewhere you can write to (Desktop or Documents, not Program Files).
+3. **Double-click `Restrafe.exe`.** Windows may say "Windows protected your PC" because the exe is not code-signed:
+   click **More info**, then **Run anyway**. For a shortcut, right-click it > Show more options > Send to > Desktop
+   (create shortcut), or Pin to Start.
+
+**The first launch takes a little longer:** Restrafe indexes the names of the objects in your installation (about
+15-30 seconds; the window can stay dark meanwhile) and caches that index in `%LOCALAPPDATA%\restrafe\`, so later
+launches take a few seconds. A STRAFTAT update rebuilds the index once.
+
+**If Restrafe cannot find STRAFTAT** (it says so in a message box), double-click `setup.exe` and paste your STRAFTAT
+folder (Steam > STRAFTAT > Properties > Installed Files > Browse). `setup` looks in this order: `--game <folder>`,
+the `RESTRAFE_ROOT` environment variable, the remembered folder (`%LOCALAPPDATA%\restrafe\installation.json`), then
+your Steam libraries; it checks that `STRAFTAT_Data/data.unity3d` can be read and remembers the folder. Nothing is
+copied, exported or downloaded.
+
+Settings are saved in the `config` folder next to `Restrafe.exe`.
+
+## Build from source
+
+1. On Windows, install [Rust](https://rustup.rs/) with the MSVC toolchain, [Visual Studio Build Tools](https://visualstudio.microsoft.com/downloads/)
    with **Desktop development with C++** and a Windows SDK, and [Git](https://git-scm.com/downloads).
-3. **Build and play.** In PowerShell or a command prompt:
+2. In PowerShell or a command prompt:
 
    ```powershell
    git clone https://github.com/notcatnine/restrafe.git
@@ -26,25 +46,12 @@ endorsed by the developers or publisher of STRAFTAT.
    .\launch.cmd
    ```
 
-   `launch.cmd` builds Restrafe, runs `setup` the first time, puts **`Restrafe.exe`** in the `restrafe` folder and
-   starts the game. Rust is only needed to build and rebuild.
-4. **Play.** From then on, just double-click **`Restrafe.exe`** in the `restrafe` folder; no command prompt
-   needed. For a desktop or Start menu shortcut, right-click it > Show more options > Send to > Desktop (create
-   shortcut), or Pin to Start. After pulling new code, run `launch.cmd` again to rebuild it. If STRAFTAT cannot be
-   found, Restrafe says so in a message box.
+   `launch.cmd` builds Restrafe (several minutes the first time), runs `setup` the first time, puts **`Restrafe.exe`**
+   in the `restrafe` folder and starts the game. From then on, double-click `Restrafe.exe`; after pulling new code,
+   run `launch.cmd` again to rebuild it.
 
-**The first launch takes a little longer.** The first build compiles everything (several minutes). The first time
-the game starts, it also indexes the names of the objects in your installation (about 10-15 seconds), then caches
-that index in `%LOCALAPPDATA%\restrafe\` so later launches only take a few seconds. The window can stay dark while
-this happens. A STRAFTAT update rebuilds the index once.
-
-`setup` finds STRAFTAT in this order: `--game <folder>`, then the `RESTRAFE_ROOT` environment
-variable, then the remembered folder (`%LOCALAPPDATA%\restrafe\installation.json`), then your Steam libraries. To find
-the folder yourself, open Steam > STRAFTAT > Properties > Installed Files > Browse. It checks that
-`STRAFTAT_Data/data.unity3d` can be read and remembers the folder. Nothing is copied, exported or downloaded.
-
-To build by hand instead, from `game/`: `cargo build --release --bins`, `cargo run --release --bin setup`, then
-`cargo run --release`.
+By hand, from `game/`: `cargo build --release --bins`, `cargo run --release --bin setup`, then `cargo run --release`.
+Releases are built by GitHub Actions from a version tag (`.github/workflows/release.yml`, `scripts/package.ps1`).
 
 ## Controls
 
@@ -71,9 +78,7 @@ hand). Press ` again or Escape to close it. It can't be opened while you are dea
 
 **Cosmetics menu (K).** The game's own customization screen. Pick a hat, suit or smoke from the **Hats**,
 **Suits** and **Smoke** tabs; the 3D preview on the right and your player model change straight away. Close it with
-**OK**, K or Escape. Everything is unlocked, and your choice is saved to `game/config/cosmetics.ron`.
-
-Settings are saved to `game/config/settings.ron`.
+**OK**, K or Escape. Everything is unlocked, and your choice is saved in the `config` folder next to `Restrafe.exe`.
 
 ## Platforms and tested build
 

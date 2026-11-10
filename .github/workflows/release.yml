@@ -1,0 +1,38 @@
+name: Release
+
+# Pushing a version tag (v0.1.0, ...) builds Restrafe on GitHub's Windows runner and publishes the zip as a
+# GitHub Release, so every download is built from the tagged source.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Build and publish (Windows)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: game
+      - name: Build
+        working-directory: game
+        run: cargo build --release --bins --locked
+      - name: Test
+        working-directory: game
+        run: cargo test --release --locked
+      - name: Package
+        shell: pwsh
+        run: ./scripts/package.ps1 -Version "${{ github.ref_name }}"
+      - name: Publish
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $tag = "${{ github.ref_name }}"
+          gh release create $tag "dist/Restrafe-$tag-windows-x64.zip" --title "Restrafe $tag" --notes-file scripts/release-notes.md --prerelease

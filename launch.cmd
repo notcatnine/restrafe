@@ -5,7 +5,7 @@ setlocal
 cd /d "%~dp0game" || exit /b 1
 cargo build --release --bins --locked || exit /b 1
 if not exist "%LOCALAPPDATA%\restrafe\installation.json" (
-    target\release\setup.exe || exit /b 1
+    target\release\setup.exe --no-pause || exit /b 1
 )
 copy /y target\release\restrafe.exe "%~dp0Restrafe.exe" >nul || exit /b 1
 start "" "%~dp0Restrafe.exe" %*

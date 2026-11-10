@@ -30,3 +30,6 @@
 /docs/RELEASE_TODO.md
 /docs/PORTING_GUIDE.md
 /docs/player_prefab_raw.txt
+
+# Release packages (scripts/package.ps1)
+/dist/

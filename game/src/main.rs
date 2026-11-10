@@ -116,7 +116,7 @@ fn main() {
         }));
         if let Err(e) = install::discover(None) {
             error_box(&format!(
-                "Restrafe could not find STRAFTAT.\n\n{e}\n\nInstall STRAFTAT through Steam, or point Restrafe at its folder once with\n  cargo run --release --bin setup -- --game \"<STRAFTAT folder>\"\n(run from the game folder of Restrafe)."
+                "Restrafe could not find STRAFTAT.\n\n{e}\n\nInstall STRAFTAT through Steam, then run setup.exe (next to Restrafe.exe; when built from source, game\\target\\release\\setup.exe) and give it the STRAFTAT folder."
             ));
             return;
         }

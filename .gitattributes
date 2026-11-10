@@ -4,3 +4,5 @@
 *.png binary
 *.ktx2 binary
 *.cmd text eol=crlf
+*.ps1 text eol=crlf
+scripts/*.txt text eol=crlf
